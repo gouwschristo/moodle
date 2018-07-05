@@ -13,7 +13,7 @@ All tunable parameters resides in the **host_vars/moodle** file.
   - **db_password:** The password to be set for access to the database mentioned above.
   - **admin_user:** The default administrative login name for web-console.
   - **admin_password:**  The default administrative login password for web-console.
-  - **admin_email:** "admin@domain.com" The default administrative email details for web-console.
+  - **admin_email:** The default administrative email details for web-console.
   - **site_fullname:** This is the full title of the site.
   - **site_shortname:** This is a short name title for the site.
 
@@ -21,7 +21,7 @@ All tunable parameters resides in the **host_vars/moodle** file.
 
 This playbook will install the Moodle framework on a Ubuntu 16.04 LTS server. 
 
-Install Ansible on your local workstation using the following commandsL
+Install Ansible on your local workstation using the following commands:
 
 **Ubuntu**
 ```sh
@@ -31,7 +31,7 @@ $ sudo apt-get update
 $ sudo apt-get install ansible
 ```
 
-** Redhat/CentOS**
+**Redhat/CentOS**
 ```sh
 # install the epel-release RPM if needed on CentOS or RHEL
 $ sudo yum install ansible
