@@ -1,0 +1,2 @@
+[servers]
+moodle ansible_user=ubuntu ansible_host=34.244.91.212

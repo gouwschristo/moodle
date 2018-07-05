@@ -1,0 +1,11 @@
+install_dir: "/var/www/html"
+www_root: "http://34.244.91.212"
+data_dir: "/data"
+db_name: moodle
+db_user: moodle
+db_password: "8b7bf4bf00799"
+admin_user: admin
+admin_password: 309a20d8482a2
+admin_email: "admin@domain.com"
+site_fullname: "My Moodle Site"
+site_shortname: "MMS"

@@ -1,0 +1,196 @@
+---
+- name: Updating repositories cache
+  apt:
+    update_cache: yes
+
+- name: installing common-tools
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - curl
+    - net-tools
+    - wget
+    - tar
+    - unzip
+    - zip
+    - gzip
+    - python-mysqldb
+
+
+- name: Installing Nginx
+  apt:
+    name: nginx
+    state: present
+  notify:
+    - restart nginx
+
+- name: Installing PHP-FPM
+  apt:
+    name: php-fpm
+    state: present
+  notify:
+    - restart php-fpm
+
+- name: Installing PHP modules
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - php-mysqli
+    - php-curl
+    - php-mbstring
+    - php-xmlrpc
+    - php-soap
+    - php-zip
+    - php-gd
+    - php-simplexml
+    - php-dom
+    - php-xml
+    - php-intl
+    - php-json
+  notify:
+    - restart php-fpm
+
+- name: Installing MariaDB
+  apt:
+    name: mariadb-server
+    state: present
+
+- name: Installing cron
+  apt:
+    name: cron
+    state: present
+
+- name: Installing postfix
+  apt:
+    name: postfix
+    state: present
+
+- name: Configuring Nginx
+  template:
+    src: templates/nginx_vhost.conf
+    dest: /etc/nginx/sites-available/default
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart nginx
+
+- name: Configuring MariaDB
+  template:
+    src: templates/mariadb.conf
+    dest: /etc/mysql/mariadb.conf.d/50-server.cnf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart mariadb
+
+- name: Starting Nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+
+- name: Starting PHP-FPM
+  service:
+    name: php7.0-fpm
+    state: started
+    enabled: yes
+
+- name: Starting MariaDB
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: Starting cron
+  service:
+    name: cron
+    state: started
+    enabled: yes
+
+- name: Starting postfix
+  service:
+    name: postfix
+    state: started
+    enabled: yes
+
+- name: Determining if moodle is already installed
+  stat:
+    path: "{{ install_dir }}/moodle/index.php"
+  register: moodle_installation
+
+
+- name: Fetching moodle installation
+  unarchive: 
+    src: "https://download.moodle.org/stable35/moodle-latest-35.zip"
+    dest: "{{ install_dir }}"
+    remote_src: yes
+  when: moodle_installation.stat.exists == False 
+
+
+- name: Ensuring correct permissions are set
+  file: 
+    path: "{{ install_dir }}"
+    owner: www-data 
+    group: www-data
+    mode: "u=rwX,g=rX,o=rX"
+    recurse: yes
+  when: moodle_installation.stat.exists == False 
+
+
+- name: Setting up moodle config
+  template:
+    src: templates/config.php
+    dest: "{{ install_dir }}/moodle/config.php"
+    owner: www-data
+    group: www-data
+    mode: 0644
+
+- name: Ensuring data directory exists
+  file:
+    path: "{{ data_dir }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0755
+
+- name: Checking if DB already exists
+  shell: mysql -e 'SHOW DATABASES;' | grep {{ db_name }}
+  register: dbstatus
+  failed_when: dbstatus.rc == 2
+
+
+- name: Creating a new database
+  mysql_db:
+    name: moodle
+    state: present
+  when: dbstatus.rc != 0 
+
+
+- name: Creating new database user
+  mysql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    state: present
+  when: dbstatus.rc != 0 
+
+
+- name: Running moodle installer
+  command: /usr/bin/php "{{ install_dir }}/moodle/admin/cli/install_database.php" --agree-license --adminuser="{{ admin_user}}" --adminpass="{{ admin_password }}" --adminemail="{{ admin_email }}" --fullname="{{ site_fullname }}" --shortname="{{ site_shortname }}"
+  when: dbstatus.rc != 0 
+
+- name: Setting up moodle cron file
+  template:
+    src: templates/cron
+    dest: /etc/cron.d/moodle
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart cron
+

@@ -1,0 +1,2 @@
+* * * * *    /usr/bin/php "{{ install_dir }}/moodle/admin/cli/cron.php" >/dev/null
+
