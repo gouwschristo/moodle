@@ -137,8 +137,8 @@
 - name: Ensuring correct permissions are set
   file: 
     path: "{{ install_dir }}"
-    owner: www-data 
-    group: www-data
+    owner: ubuntu
+    group: ubuntu
     mode: "u=rwX,g=rX,o=rX"
     recurse: yes
   when: moodle_installation.stat.exists == False 
