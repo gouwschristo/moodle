@@ -1,5 +1,5 @@
 install_dir: "/var/www/html"
-www_root: "http://34.244.91.212"
+www_root: "http://34.244.141.6"
 data_dir: "/data"
 db_name: moodle
 db_user: moodle

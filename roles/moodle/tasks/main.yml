@@ -118,6 +118,8 @@
     state: started
     enabled: yes
 
+- meta: flush_handlers
+
 - name: Determining if moodle is already installed
   stat:
     path: "{{ install_dir }}/moodle/index.php"
